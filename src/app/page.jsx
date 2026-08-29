@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
     const [input, setInput] = useState("");
@@ -15,6 +15,29 @@ export default function Home() {
 
     // Thinking... fallback
     const [isLoading, setIsLoading] = useState(false);
+
+    // Keyboard & Input field adjustment for mobile
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.visualViewport) {
+            const handleResize = () => {
+                window.scrollTo(0, 0);  // Main play role
+            };
+
+            window.visualViewport.addEventListener("resize", handleResize);
+            return () => {
+                window.visualViewport.removeEventListener("resize", handleResize);
+            };
+        }
+    }, []);
+
+    const handleInputFocus = () => {
+        setTimeout(() => {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth",
+            });
+        }, 300); // কিবোর্ড অ্যানিমেশন শেষ হওয়া পর্যন্ত সামান্য ডিলে
+    };
 
     // When user click send button
     const handleSendMessage = async () => {
@@ -84,8 +107,8 @@ export default function Home() {
 
     return (
         <main className="min-h-screen bg-gray-100 p-4 transition-colors dark:bg-gray-950">
-            {/* Changed min-h-[90vh] to h-[90vh] for proper chat layout scrolling */}
-            <div className="mx-auto flex h-[90vh] max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg dark:bg-gray-900">
+            {/* Changed min-h-[90vh] to h-[90dvh] for proper chat layout scrolling */}
+            <div className="mx-auto flex h-[90dvh] max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg dark:bg-gray-900">
 
                 {/* Header - Made Sticky */}
                 <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-5 py-4 dark:bg-gray-900 dark:border-gray-800">
@@ -107,8 +130,8 @@ export default function Home() {
                             <div
                                 key={message.id}
                                 className={`max-w-[85%] rounded-2xl px-4 py-3 ${isUser
-                                        ? "ml-auto rounded-tr-md bg-green-500 text-white"
-                                        : "rounded-tl-md bg-gray-100 dark:bg-gray-800"
+                                    ? "ml-auto rounded-tr-md bg-green-500 text-white"
+                                    : "rounded-tl-md bg-gray-100 dark:bg-gray-800"
                                     }`}
                             >
                                 {/* TODO : Remove this in production */}
@@ -150,6 +173,7 @@ export default function Home() {
                             value={input}
                             onChange={(event) => setInput(event.target.value)}
                             onKeyDown={handleKeyDown}
+                            onFocus={handleInputFocus}
                             disabled={isLoading}
                             placeholder="Ask a recipe..."
                             className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
