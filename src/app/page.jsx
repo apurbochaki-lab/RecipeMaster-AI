@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
     const [input, setInput] = useState("");
@@ -15,31 +15,17 @@ export default function Home() {
 
     // Thinking... fallback
     const [isLoading, setIsLoading] = useState(false);
+    const chatEndRef = useRef(null);
 
-    // Keyboard & Input field adjustment for mobile
-    useEffect(() => {
-        if (typeof window !== "undefined" && window.visualViewport) {
-            const handleResize = () => {
-                window.scrollTo(0, 0);  // Main play role
-            };
-
-            window.visualViewport.addEventListener("resize", handleResize);
-            return () => {
-                window.visualViewport.removeEventListener("resize", handleResize);
-            };
-        }
-    }, []);
-
-    const handleInputFocus = () => {
-        setTimeout(() => {
-            window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: "smooth",
-            });
-        }, 300); // কিবোর্ড অ্যানিমেশন শেষ হওয়া পর্যন্ত সামান্য ডিলে
+    // নতুন মেসেজ আসলে নিচে স্ক্রল করার জন্য
+    const scrollToBottom = () => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // When user click send button
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading]);
+
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -53,10 +39,11 @@ export default function Home() {
 
         setMessages(updatedMessages);
         setInput("");
-        setIsLoading(true); // Thinking...
+        setIsLoading(true);  // Thinking...
 
         try {
             // Fetch API for send full conversation to AI
+
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: {
@@ -105,24 +92,30 @@ export default function Home() {
         }
     };
 
-    return (
-        <main className="min-h-screen bg-gray-100 p-4 transition-colors dark:bg-gray-950">
-            {/* Changed min-h-[90vh] to h-[90dvh] for proper chat layout scrolling */}
-            <div className="mx-auto flex h-[90dvh] max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg dark:bg-gray-900">
+    // মেসেঞ্জার ব্রাউজারে ইনপুট ফোকাস হলে কিবোর্ডের উপরে ভিউ আনার জন্য
+    const handleInputFocus = (e) => {
+        setTimeout(() => {
+            e.target.scrollIntoView({ block: "end", behavior: "smooth" });
+            scrollToBottom();
+        }, 300);
+    };
 
-                {/* Header - Made Sticky */}
-                <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-5 py-4 dark:bg-gray-900 dark:border-gray-800">
+    return (
+        <main className="min-h-[100dvh] bg-gray-100 transition-colors dark:bg-gray-950 md:p-4">
+            <div className="mx-auto flex h-[100dvh] max-w-3xl flex-col bg-white shadow-lg dark:bg-gray-900 md:h-[90dvh] md:rounded-2xl md:overflow-hidden">
+
+                {/* Header - Fixed/Sticky Top */}
+                <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/95 px-5 py-4 backdrop-blur dark:border-gray-800 dark:bg-gray-900/95">
                     <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                         🤖 RecipeMaster AI
                     </h1>
-
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Your personal food recipe assistant
                     </p>
                 </header>
 
-                {/* Chat Area */}
-                <section className="flex-1 space-y-4 overflow-y-auto p-5">
+                {/* Chat Area - Flexible Scroll Container */}
+                <section className="flex-1 space-y-4 overflow-y-auto p-5 pb-24 md:pb-5">
                     {messages.map((message) => {
                         const isUser = message.role === "user";
 
@@ -134,11 +127,10 @@ export default function Home() {
                                     : "rounded-tl-md bg-gray-100 dark:bg-gray-800"
                                     }`}
                             >
-                                {/* TODO : Remove this in production */}
                                 {!isUser && message?.model && (
-                                    <p className="text-amber-300/50 font-semibold pb-3">
+                                    <p className="pb-3 font-semibold text-amber-300/50">
                                         {message?.model}
-                                        <span className="text-white/50 mx-1.5">|</span>
+                                        <span className="mx-1.5 text-white/50">|</span>
                                         <span className="text-emerald-400/50">
                                             {message?.provider}
                                         </span>
@@ -155,7 +147,6 @@ export default function Home() {
                         );
                     })}
 
-                    {/* Loading */}
                     {isLoading && (
                         <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-gray-100 px-4 py-3 dark:bg-gray-800">
                             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -163,10 +154,13 @@ export default function Home() {
                             </p>
                         </div>
                     )}
+
+                    {/* অটো স্ক্রল এর জন্য ডামি রেফারেন্স */}
+                    <div ref={chatEndRef} />
                 </section>
 
-                {/* Input Area */}
-                <footer className="border-t border-gray-200 p-4 dark:border-gray-800">
+                {/* Input Area - Sticky Bottom for In-App Browsers */}
+                <footer className="sticky bottom-0 z-20 border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                     <div className="flex gap-2">
                         <input
                             type="text"
