@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -16,6 +16,28 @@ export default function Home() {
   // Thinking... fallback
   const [isLoading, setIsLoading] = useState(false);
 
+  // Keyboard & Input field adjustment for mobile
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.visualViewport) {
+      const handleResize = () => {
+        window.scrollTo(0, 0);  // Main play role
+      };
+
+      window.visualViewport.addEventListener("resize", handleResize);
+      return () => {
+        window.visualViewport.removeEventListener("resize", handleResize);
+      };
+    }
+  }, []);
+
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 300); // কিবোর্ড অ্যানিমেশন শেষ হওয়া পর্যন্ত সামান্য ডিলে
+  };
 
   // When user click send button
   const handleSendMessage = async () => {
@@ -31,11 +53,10 @@ export default function Home() {
 
     setMessages(updatedMessages);
     setInput("");
-    setIsLoading(true);  // Thinking...
+    setIsLoading(true); // Thinking...
 
     try {
       // Fetch API for send full conversation to AI
-
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -49,9 +70,7 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data?.error || "Something went wrong."
-        );
+        throw new Error(data?.error || "Something went wrong.");
       }
 
       const aiMessage = {
@@ -61,28 +80,20 @@ export default function Home() {
 
         // For developing purpose
         model: data.model,
-        provider: data.provider
+        provider: data.provider,
       };
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        aiMessage,
-      ]);
-
+      setMessages((prevMessages) => [...prevMessages, aiMessage]);
     } catch (error) {
       console.error("Chat error:", error);
 
       const errorMessage = {
         id: Date.now() + 1,
         role: "assistant",
-        content:
-          "Sorry, something went wrong. Please try again.",
+        content: "Sorry, something went wrong. Please try again.",
       };
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        errorMessage,
-      ]);
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -96,10 +107,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-100 p-4 transition-colors dark:bg-gray-950">
-      <div className="mx-auto flex min-h-[90vh] max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg dark:bg-gray-900">
+      {/* Changed min-h-[90vh] to h-[90dvh] for proper chat layout scrolling */}
+      <div className="mx-auto flex h-[90dvh] max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg dark:bg-gray-900">
 
-        {/* Header */}
-        <header className="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+        {/* Header - Made Sticky */}
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-5 py-4 dark:bg-gray-900 dark:border-gray-800">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             🤖 RecipeMaster AI
           </h1>
@@ -111,7 +123,6 @@ export default function Home() {
 
         {/* Chat Area */}
         <section className="flex-1 space-y-4 overflow-y-auto p-5">
-
           {messages.map((message) => {
             const isUser = message.role === "user";
 
@@ -124,19 +135,18 @@ export default function Home() {
                   }`}
               >
                 {/* TODO : Remove this in production */}
-                {
-                  (!isUser && message?.model) &&
+                {!isUser && message?.model && (
                   <p className="text-amber-300/50 font-semibold pb-3">
                     {message?.model}
                     <span className="text-white/50 mx-1.5">|</span>
-                    <span className="text-emerald-400/50">{message?.provider}</span>
+                    <span className="text-emerald-400/50">
+                      {message?.provider}
+                    </span>
                   </p>
-                }
+                )}
 
                 <p
-                  className={`whitespace-pre-wrap text-sm leading-6 ${isUser
-                    ? "text-white"
-                    : "text-gray-800 dark:text-gray-200"
+                  className={`whitespace-pre-wrap text-sm leading-6 ${isUser ? "text-white" : "text-gray-800 dark:text-gray-200"
                     }`}
                 >
                   {message.content}
@@ -153,20 +163,17 @@ export default function Home() {
               </p>
             </div>
           )}
-
         </section>
 
         {/* Input Area */}
         <footer className="border-t border-gray-200 p-4 dark:border-gray-800">
           <div className="flex gap-2">
-
             <input
               type="text"
               value={input}
-              onChange={(event) =>
-                setInput(event.target.value)
-              }
+              onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={handleInputFocus}
               disabled={isLoading}
               placeholder="Ask a recipe..."
               className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
@@ -180,10 +187,8 @@ export default function Home() {
             >
               {isLoading ? "..." : "➤"}
             </button>
-
           </div>
         </footer>
-
       </div>
     </main>
   );

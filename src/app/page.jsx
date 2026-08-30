@@ -71,6 +71,7 @@ export default function Home() {
             };
 
             setMessages((prevMessages) => [...prevMessages, aiMessage]);
+
         } catch (error) {
             console.error("Chat error:", error);
 

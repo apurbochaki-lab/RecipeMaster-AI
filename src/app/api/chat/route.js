@@ -1,3 +1,5 @@
+import { SYSTEM_PROMPT } from "@/prompt/recipePrompt";
+
 export const POST = async (request) => {
     try {
         const body = await request.json();  // Messages JSON --> JavaScript Object conversion
@@ -17,16 +19,23 @@ export const POST = async (request) => {
 
         };
 
-        // Fetch for AI, Select model & Send user messages
+        // Fetch for OpenRouter AI, Select model & Send user messages
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`
             },
+
             body: JSON.stringify({
                 model: "openrouter/free",
-                messages
+                messages: [
+                    {
+                        role: "system",
+                        content: SYSTEM_PROMPT
+                    },
+                    ...messages
+                ]
             })
         });
 
