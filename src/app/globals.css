@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+/* Chat scrollbar - Chrome, Edge, Safari */
+.chat-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 9999px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #22c55e;
+}
+
+/* Firefox */
+.chat-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #374151 transparent;
+}

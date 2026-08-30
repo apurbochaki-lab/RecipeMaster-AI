@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Children, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
     const [input, setInput] = useState("");
@@ -116,7 +117,7 @@ export default function Home() {
                 </header>
 
                 {/* Chat Area - Flexible Scroll Container */}
-                <section className="flex-1 space-y-4 overflow-y-auto p-5 pb-24 md:pb-5">
+                <section className="chat-scrollbar flex-1 space-y-4 overflow-y-auto p-5 pb-24 md:pb-5">
                     {messages.map((message) => {
                         const isUser = message.role === "user";
 
@@ -138,19 +139,80 @@ export default function Home() {
                                     </p>
                                 )}
 
-                                <p
-                                    className={`whitespace-pre-wrap text-sm leading-6 ${isUser ? "text-white" : "text-gray-800 dark:text-gray-200"
-                                        }`}
-                                >
-                                    {message.content}
-                                </p>
+
+                                {isUser ? (
+                                    <p className="whitespace-pre-wrap text-sm leading-6 text-white">
+                                        {message.content}
+                                    </p>
+                                ) : (
+                                    <div className="text-sm leading-6 text-gray-800 dark:text-gray-200">
+                                        <ReactMarkdown
+                                            components={{
+                                                // markdown components
+                                                h1: ({ children }) => (
+                                                    <h1 className="mb-3 text-2xl font-bold">
+                                                        {children}
+                                                    </h1>
+                                                ),
+
+                                                h2: ({ children }) => (
+                                                    <h2 className="mb-3 text-xl font-bold">
+                                                        {children}
+                                                    </h2>
+                                                ),
+
+                                                h3: ({ children }) => (
+                                                    <h3 className="mb-2 text-lg font-semibold">
+                                                        {children}
+                                                    </h3>
+                                                ),
+
+                                                p: ({ children }) => (
+                                                    <p className="mb-3 last:mb-0">
+                                                        {children}
+                                                    </p>
+                                                ),
+
+                                                ul: ({ children }) => (
+                                                    <ul className="mb-3 ml-5 list-disc space-y-1">
+                                                        {children}
+                                                    </ul>
+                                                ),
+
+                                                ol: ({ children }) => (
+                                                    <ol className="mb-3 ml-5 list-decimal space-y-1">
+                                                        {children}
+                                                    </ol>
+                                                ),
+
+                                                li: ({ children }) => (
+                                                    <li>{children}</li>
+                                                ),
+
+                                                strong: ({ children }) => (
+                                                    <strong className="font-semibold">
+                                                        {children}
+                                                    </strong>
+                                                ),
+
+                                                blockquote: ({ children }) => (
+                                                    <blockquote className="my-3 border-l-4 border-green-500 pl-4 italic text-gray-600 dark:text-gray-400">
+                                                        {children}
+                                                    </blockquote>
+                                                )
+                                            }}
+                                        >
+                                            {message.content}
+                                        </ReactMarkdown>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
 
                     {isLoading && (
                         <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-gray-100 px-4 py-3 dark:bg-gray-800">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
                                 Thinking...
                             </p>
                         </div>
