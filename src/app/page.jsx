@@ -2,6 +2,8 @@
 
 import { Children, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 
 export default function Home() {
     const [input, setInput] = useState("");
@@ -147,22 +149,22 @@ export default function Home() {
                                 ) : (
                                     <div className="text-sm leading-6 text-gray-800 dark:text-gray-200">
                                         <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
                                             components={{
-                                                // markdown components
                                                 h1: ({ children }) => (
-                                                    <h1 className="mb-3 text-2xl font-bold">
+                                                    <h1 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
                                                         {children}
                                                     </h1>
                                                 ),
 
                                                 h2: ({ children }) => (
-                                                    <h2 className="mb-3 text-xl font-bold">
+                                                    <h2 className="mb-3 mt-5 text-xl font-bold text-gray-900 first:mt-0 dark:text-white">
                                                         {children}
                                                     </h2>
                                                 ),
 
                                                 h3: ({ children }) => (
-                                                    <h3 className="mb-2 text-lg font-semibold">
+                                                    <h3 className="mb-2 mt-4 text-lg font-semibold text-gray-900 first:mt-0 dark:text-white">
                                                         {children}
                                                     </h3>
                                                 ),
@@ -174,32 +176,99 @@ export default function Home() {
                                                 ),
 
                                                 ul: ({ children }) => (
-                                                    <ul className="mb-3 ml-5 list-disc space-y-1">
+                                                    <ul className="mb-3 ml-5 list-disc space-y-1 last:mb-0">
                                                         {children}
                                                     </ul>
                                                 ),
 
                                                 ol: ({ children }) => (
-                                                    <ol className="mb-3 ml-5 list-decimal space-y-1">
+                                                    <ol className="mb-3 ml-5 list-decimal space-y-1 last:mb-0">
                                                         {children}
                                                     </ol>
                                                 ),
 
                                                 li: ({ children }) => (
-                                                    <li>{children}</li>
+                                                    <li className="pl-1">
+                                                        {children}
+                                                    </li>
                                                 ),
 
                                                 strong: ({ children }) => (
-                                                    <strong className="font-semibold">
+                                                    <strong className="font-semibold text-gray-900 dark:text-white">
                                                         {children}
                                                     </strong>
                                                 ),
 
+                                                em: ({ children }) => (
+                                                    <em className="italic">
+                                                        {children}
+                                                    </em>
+                                                ),
+
                                                 blockquote: ({ children }) => (
-                                                    <blockquote className="my-3 border-l-4 border-green-500 pl-4 italic text-gray-600 dark:text-gray-400">
+                                                    <blockquote className="my-4 border-l-4 border-green-500 pl-4 italic text-gray-600 dark:text-gray-400">
                                                         {children}
                                                     </blockquote>
-                                                )
+                                                ),
+
+                                                hr: () => (
+                                                    <hr className="my-5 border-gray-200 dark:border-gray-700" />
+                                                ),
+
+                                                a: ({ href, children }) => (
+                                                    <a
+                                                        href={href}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="font-medium text-green-600 underline decoration-green-500/40 underline-offset-2 transition hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                                                    >
+                                                        {children}
+                                                    </a>
+                                                ),
+
+                                                table: ({ children }) => (
+                                                    <div className="my-4 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+                                                        <table className="w-full min-w-max border-collapse text-left text-sm">
+                                                            {children}
+                                                        </table>
+                                                    </div>
+                                                ),
+
+                                                thead: ({ children }) => (
+                                                    <thead className="bg-gray-100 dark:bg-gray-700/20">
+                                                        {children}
+                                                    </thead>
+                                                ),
+
+                                                tbody: ({ children }) => (
+                                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-600/70">
+                                                        {children}
+                                                    </tbody>
+                                                ),
+
+                                                tr: ({ children }) => (
+                                                    <tr>
+                                                        {children}
+                                                    </tr>
+                                                ),
+
+                                                th: ({ children }) => (
+                                                    <th className="whitespace-nowrap border-b border-r border-gray-200 px-4 py-3 font-semibold text-gray-900 dark:border-gray-700 dark:text-white">
+                                                        {children}
+                                                    </th>
+                                                ),
+
+                                                td: ({ children }) => (
+                                                    <td className="border-b border-r border-gray-100 px-4 py-3 text-gray-700 dark:border-gray-600/70 dark:text-gray-300">
+                                                        {children}
+                                                    </td>
+                                                ),
+
+                                                del: ({ children }) => (
+                                                    <del className="text-gray-500 dark:text-gray-500">
+                                                        {children}
+                                                    </del>
+                                                ),
                                             }}
                                         >
                                             {message.content}
